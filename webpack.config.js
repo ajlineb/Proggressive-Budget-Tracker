@@ -2,9 +2,11 @@ const WebpackPwaManifest = require("webpack-pwa-manifest");
 const path = require("path");
 
 const config = {
-  entry: "./public/index.js",
+  entry: {
+    app: "./public/index.js",
+  },
   output: {
-    path: __dirname + "./public/dist",
+    path: __dirname + "/public",
     filename: "[name].bundle.js",
   },
   mode: "development",
@@ -25,17 +27,17 @@ const config = {
   plugins: [
     new WebpackPwaManifest({
       fingerprints: false,
-      name: "workout tracker",
-      short_name: "workout",
-      description:
-        "An application that allows you to view different transactions both online and offline.",
+      name: "Budget Tracker",
+      short_name: "Budget",
+      description: "An application that allows you to tacker your budget",
       background_color: "#01579b",
       theme_color: "#ffffff",
       "theme-color": "#ffffff",
       start_url: "/",
+      publicPath: "./",
       icons: [
         {
-          src: path.resolve("public/dist/auto/public/icons/icon-192x192.png"),
+          src: path.resolve("public/icons/icon-192x192.png"),
           sizes: [96, 128, 192, 256, 384, 512],
           destination: path.join("public", "icons"),
         },

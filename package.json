@@ -9,7 +9,7 @@
     "start:prod": "npm run build && node server.js",
     "start:dev": "concurrently \"npm run server\" \"cd client && npm run start\"",
     "server": "nodemon server.js --ignore client",
-    "build": "webpack --watch",
+    "build": "webpack",
     "client": "cd client && npm start",
     "lite-server": "lite-server"
   },
