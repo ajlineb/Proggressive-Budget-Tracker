@@ -5,9 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "if-env NODE_ENV=production && npm run start:prod || npm run start:dev",
-    "start:prod": "npm run build && node server.js",
-    "start:dev": "concurrently \"npm run server\" \"cd client && npm run start\"",
+    "start": "nodemon server.js",
     "server": "nodemon server.js --ignore client",
     "build": "webpack",
     "client": "cd client && npm start",
