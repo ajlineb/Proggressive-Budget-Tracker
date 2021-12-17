@@ -5,6 +5,7 @@ const FILES_TO_CACHE = [
   "/styles.css",
   "/dist/app.bundle.js",
   "https://fonts.googleapis.com/css?family=Istok+Web|Montserrat:800&display=swap",
+  "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css",
   "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css",
 ];
 
