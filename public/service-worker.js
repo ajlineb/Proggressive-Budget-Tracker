@@ -18,21 +18,21 @@ const FILES_TO_CACHE = [
   "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css",
 ];
 
-const PRECACHE = "precache-v1";
+const cacheName = "v1";
 const RUNTIME = "runtime";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
-      .open(PRECACHE)
+      .open(cacheName)
       .then((cache) => cache.addAll(FILES_TO_CACHE))
-      .then(self.skipWaiting())
+      .then(() => self.skipWaiting())
   );
 });
 
 // The activate handler takes care of cleaning up old caches.
 self.addEventListener("activate", (event) => {
-  const currentCaches = [PRECACHE, RUNTIME];
+  const currentCaches = [cacheName, RUNTIME];
   event.waitUntil(
     caches
       .keys()
@@ -52,9 +52,11 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// fetch
+// call fetch event
 self.addEventListener("fetch", function (evt) {
   // cache successful requests to the API
+  console.log("Service Worker: Fetching...");
+  fetch(evt.request).catch(() => caches.match(e.request));
   if (evt.request.url.includes("/api/")) {
     evt.respondWith(
       caches
@@ -81,7 +83,6 @@ self.addEventListener("fetch", function (evt) {
   }
 
   // if the request is not for the API, serve static assets using "offline-first" approach.
-  // see https://developers.google.com/web/fundamentals/instant-and-offline/offline-cookbook#cache-falling-back-to-network
   evt.respondWith(
     caches.match(evt.request).then(function (response) {
       return response || fetch(evt.request);
