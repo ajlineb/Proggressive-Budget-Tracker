@@ -1,6 +1,7 @@
 const FILES_TO_CACHE = [
   "/",
   "/index.html",
+  "/indexedDb.js",
   "/index.js",
   "/styles.css",
   "/app.bundle.js",
@@ -18,21 +19,21 @@ const FILES_TO_CACHE = [
   "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css",
 ];
 
-const cacheName = "v1";
+const PRECACHE = "precache-v1";
 const RUNTIME = "runtime";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
-      .open(cacheName)
+      .open(PRECACHE)
       .then((cache) => cache.addAll(FILES_TO_CACHE))
-      .then(() => self.skipWaiting())
+      .then(self.skipWaiting())
   );
 });
 
 // The activate handler takes care of cleaning up old caches.
 self.addEventListener("activate", (event) => {
-  const currentCaches = [cacheName, RUNTIME];
+  const currentCaches = [PRECACHE, RUNTIME];
   event.waitUntil(
     caches
       .keys()
@@ -52,60 +53,100 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// call fetch event
-self.addEventListener("fetch", function (evt) {
-  // cache successful requests to the API
-  console.log("Service Worker: Fetching...");
-  fetch(evt.request).catch(() => caches.match(e.request));
-  if (evt.request.url.includes("/api/")) {
-    evt.respondWith(
-      caches
-        .open(RUNTIME)
-        .then((cache) => {
-          return fetch(evt.request)
-            .then((response) => {
-              // If the response was good, clone it and store it in the cache.
-              if (response.status === 200) {
-                cache.put(evt.request.url, response.clone());
-              }
+self.addEventListener("fetch", (event) => {
+  if (event.request.url.startsWith(self.location.origin)) {
+    if (event.request.method === "POST") {
+      console.log("GETTING OUT OF HERE!");
+      return;
+    }
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
 
+        return caches.open(RUNTIME).then((cache) => {
+          return fetch(event.request).then((response) => {
+            console.log(event.request);
+
+            return cache.put(event.request, response.clone()).then(() => {
               return response;
-            })
-            .catch((err) => {
-              // Network request failed, try to get it from the cache.
-              return cache.match(evt.request);
             });
-        })
-        .catch((err) => console.log(err))
+          });
+        });
+      })
     );
-
-    return;
   }
-
-  // if the request is not for the API, serve static assets using "offline-first" approach.
-  evt.respondWith(
-    caches.match(evt.request).then(function (response) {
-      return response || fetch(evt.request);
-    })
-  );
 });
 
-// self.addEventListener("fetch", (event) => {
-//   if (event.request.url.startsWith(self.location.origin)) {
-//     event.respondWith(
-//       caches.match(event.request).then((cachedResponse) => {
-//         if (cachedResponse) {
-//           return cachedResponse;
-//         }
+// const cacheName = "v1";
+// const RUNTIME = "runtime";
 
-//         return caches.open(RUNTIME).then((cache) => {
-//           return fetch(event.request).then((response) => {
-//             return cache.put(event.request, response.clone()).then(() => {
-//               return response;
-//             });
-//           });
-//         });
+// self.addEventListener("install", (event) => {
+//   event.waitUntil(
+//     caches
+//       .open(cacheName)
+//       .then((cache) => cache.addAll(FILES_TO_CACHE))
+//       .then(() => self.skipWaiting())
+//   );
+// });
+
+// // The activate handler takes care of cleaning up old caches.
+// self.addEventListener("activate", (event) => {
+//   const currentCaches = [cacheName, RUNTIME];
+//   event.waitUntil(
+//     caches
+//       .keys()
+//       .then((cacheNames) => {
+//         return cacheNames.filter(
+//           (cacheName) => !currentCaches.includes(cacheName)
+//         );
 //       })
+//       .then((cachesToDelete) => {
+//         return Promise.all(
+//           cachesToDelete.map((cacheToDelete) => {
+//             return caches.delete(cacheToDelete);
+//           })
+//         );
+//       })
+//       .then(() => self.clients.claim())
+//   );
+// });
+
+// // call fetch event
+// self.addEventListener("fetch", function (evt) {
+//   // cache successful requests to the API
+//   console.log("Service Worker: Fetching...");
+//   fetch(evt.request).catch(() => caches.match(evt.request));
+//   if (evt.request.url.includes("/api/")) {
+//     evt.respondWith(
+//       caches
+//         .open(RUNTIME)
+//         .then((cache) => {
+//           return fetch(evt.request)
+//             .then((response) => {
+//               // If the response was good, clone it and store it in the cache.
+//               if (response.status === 200) {
+//                 cache.put(evt.request.url, response.clone());
+//               }
+
+//               return response;
+//             })
+//             .catch((err) => {
+//               // Network request failed, try to get it from the cache.
+//               return cache.match(evt.request);
+//             });
+//         })
+//         .catch((err) => console.log(err))
 //     );
+
+//     return;
 //   }
+
+//   // if the request is not for the API, serve static assets using "offline-first" approach.
+//   evt.respondWith(
+//     caches.match(evt.request).then(function (response) {
+//       return response || fetch(evt.request);
+//     })
+//   );
 // });

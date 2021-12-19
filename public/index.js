@@ -1,5 +1,3 @@
-import { useIndexedDb } from "./indexedDb";
-
 let transactions = [];
 let myChart;
 
@@ -102,10 +100,6 @@ function sendTransaction(isAdding) {
     date: new Date().toISOString(),
   };
 
-  const saveRecord = (data) => {
-    console.log(data);
-  };
-
   // if subtracting funds, convert amount to negative number
   if (!isAdding) {
     transaction.value *= -1;
@@ -143,10 +137,9 @@ function sendTransaction(isAdding) {
     .catch((err) => {
       // fetch failed, so save in indexed db
       //how do i send this to be placed in the indexDB ???
+      console.log("saving record..");
       saveRecord(transaction);
-      function saveRecord(data) {
-        console.log(data);
-      }
+
       // clear form
       nameEl.value = "";
       amountEl.value = "";
